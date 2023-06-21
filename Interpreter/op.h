@@ -283,6 +283,22 @@ public:
     virtual Result eval();
 };
 
+// An IF statement
+class IfStatement: public BinaryOp
+{
+public:
+    IfStatement(LexerToken _token);
+    virtual Result eval();
+};
+
+// can have a bunch of statemetns - used for if/while blocks or for functiosn in future ?
+class Statementblock: public NaryOp
+{
+public:
+    Statementblock(LexerToken _token);
+    virtual Result eval();
+};
+
 // A variable declaration operation
 class VarDecl: public UnaryOp 
 {

@@ -30,7 +30,9 @@ const char* TSTR[] = {
     "COMMA",
     "DOT",
     "DOUBLE_QUOTES",
-    "SCANF"
+    "SCANF",
+    "IF",
+    "ENDIF"
 };
 
 
@@ -334,8 +336,11 @@ bool Lexer::lex_kw_id()
         _curtok.token = PRINT;
     } else if(_curtok.lexeme == "scanf") {
         _curtok.token = SCANF;
-    }
-    else if(_curtok.lexeme == "integer") {
+    } else if(_curtok.lexeme == "if") {
+        _curtok.lexeme = IF;
+    } else if(_curtok.lexeme == "endif") {
+        _curtok.lexeme = ENDIF;
+    } else if(_curtok.lexeme == "integer") {
         _curtok.token = INTEGER_DECL;
     } else if(_curtok.lexeme == "real") {
         _curtok.token = REAL_DECL;

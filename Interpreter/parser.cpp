@@ -90,6 +90,8 @@ ParseTree *Parser::parse_statement()
         result = parse_statement_prime(var);
     } else if(has(INTEGER_DECL) or has(REAL_DECL)) {
         result = parse_var_decl();
+    } else if(has(IF)) {
+        result = parse_if();
     } else if(has(PRINT)) {
         result = parse_print();
     } else if(has(SCANF)) {
@@ -180,6 +182,32 @@ ParseTree *Parser::parse_scanf() {
     must_be(RPAREN);
     next();
     return scanner;
+}
+
+ParseTree *Parser::parse_if() {
+    next();
+    IfStatement *ifs = new IfStatement(curtok());
+    next();
+
+    // add the condition to the left child and the statemnt block to the right child
+    ifs->left(parse_condition_expression());
+    Statementblock *ifblock = new Statementblock(curtok());
+    while (not has(ENDIF)) {
+        // add all the statement to right child of the if node
+        ifblock->push(parse_statement());
+    }
+    ifs->right(ifblock);
+    next();
+    return ifs;
+}
+
+ParseTree *Parser::parse_condition_expression() {
+    ParseTree *result;
+    must_be(LPAREN);
+    next();
+    // need to write logic for collecting <expression> operator <expression>
+    must_be(RPAREN);
+    return result;
 }
 
 /*

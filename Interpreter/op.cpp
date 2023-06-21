@@ -294,8 +294,6 @@ Program::Program(LexerToken _token) : NaryOp(_token)
     // This space left intentionally blank
 }
 
-
-
 Result Program::eval()
 {
     // evaluate each statement in the program
@@ -626,6 +624,18 @@ Result ScanF::eval() {
     env[token().lexeme] = var;
 }
 
+//////////////////////////////////////////
+// IF Implementation
+//////////////////////////////////////////
+IfStatement::IfStatement(LexerToken _token) : BinaryOp(_token){}
+
+Result IfStatement::eval() {
+    // check if condition and then execute the if block
+    if (left()->eval().val.i == 1 && left()->eval().type == VOID) {
+        // evaluate the block
+        right()->eval();
+    }
+}
 
 //////////////////////////////////////////
 // AlphaNumeric Implementation
@@ -642,7 +652,16 @@ Result AlphaNumeric::eval() {
 }
 
 
+//////////////////////////////////////////
+// Statementblock Implementation
+//////////////////////////////////////////
+Statementblock::Statementblock(LexerToken _token) : NaryOp(_token){}
 
+Result Statementblock::eval() {
+    for(auto itr = begin(); itr != end(); itr++) {
+        (*itr)->eval();
+    }
+}
 
 //////////////////////////////////////////
 // VarDecl Implementation

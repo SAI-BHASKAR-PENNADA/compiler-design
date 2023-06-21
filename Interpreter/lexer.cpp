@@ -28,7 +28,8 @@ const char* TSTR[] = {
     "LBRACKET",
     "RBRACKET",
     "COMMA",
-    "DOT"
+    "DOT",
+    "DOUBLE_QUOTES"
 };
 
 
@@ -251,6 +252,10 @@ bool Lexer::lex_single()
 
         case ',':
             _curtok.token = COMMA;
+            break;
+
+        case '"':
+            _curtok.token = DOUBLE_QUOTES;
             break;
 
         case '.':

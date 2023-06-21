@@ -30,8 +30,6 @@ static void calc_file(const char *fname)
     std::ifstream file;
     file.open(fname);
 
-    RefEnv global; //global reference environment
-
     if(!file) {
         std::cerr << "Could not open " << fname << std::endl;
         return;
@@ -44,7 +42,7 @@ static void calc_file(const char *fname)
         ParseTree *program = parser.parse();
 
         // run the program
-        program->eval(global);
+        program->eval();
 
         file.close();
     } catch(ParseError e) {
@@ -64,7 +62,6 @@ static void calc_repl()
 {
     std::string line;
     bool print_tree;
-    RefEnv global;
 
     std::cout << "Print parse tree (y/n)? ";
     std::getline(std::cin, line);
@@ -91,7 +88,7 @@ static void calc_repl()
             if(print_tree) {
                 program->print(0);
             }
-            program->eval(global);
+            program->eval();
             delete program;
         } catch(ParseError e) {
             std::cerr << e.what() << std::endl;

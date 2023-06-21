@@ -30,7 +30,8 @@ enum Token
     LBRACKET,
     RBRACKET,
     COMMA,
-    DOT
+    DOT,
+    DOUBLE_QUOTES,
 };
 
 // translate tokens into strings for easy debugging

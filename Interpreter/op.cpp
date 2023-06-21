@@ -1,13 +1,15 @@
 #include <iostream>
 #include <cmath>
 #include <stdexcept>
-#include <vector>
 #include "lexer.h"
 #include "op.h"
 
+// global reference environment for variables
+static RefEnv env;
+
 
 //////////////////////////////////////////
-// Helper Functions and Types
+// Helper Functions
 //////////////////////////////////////////
 static ResultType coerce(Result left, Result right) 
 {
@@ -27,42 +29,6 @@ static ResultType coerce(Result left, Result right)
     //      just default to void. Eventually, we should report a type error.
     return VOID;
 }
-
-
-static ResultType token_to_type(Token tok)
-{
-    if(tok == INTEGER_DECL) {
-        return INTEGER;
-    } else if(tok == REAL_DECL) {
-        return REAL;
-    } else {
-        return VOID;
-    }
-}
-
-
-static struct ArrayVar 
-{
-    ArrayVar(ResultType type, const std::vector<int>& bounds) : bounds(bounds)
-    {
-        //set up the default entry
-        Result entry;
-        entry.type = type;
-
-        //compute the number of elements
-        int nelements=1;
-        for(auto itr = bounds.begin(); itr != bounds.end(); itr++) {
-            nelements *= *itr;
-        }
-
-        //build the array
-        data.push_back(entry);
-    }
-
-    std::vector<int> bounds;
-    std::vector<Result> data;
-};
-
 
 
 //////////////////////////////////////////
@@ -330,11 +296,11 @@ Program::Program(LexerToken _token) : NaryOp(_token)
 
 
 
-Result Program::eval(RefEnv &env)
+Result Program::eval()
 {
     // evaluate each statement in the program
     for(auto itr = begin(); itr != end(); itr++) {
-        (*itr)->eval(env);
+        (*itr)->eval();
     }
 
     // programs return void
@@ -376,11 +342,11 @@ Add::Add(LexerToken _token) : BinaryOp(_token)
 }
 
 
-Result Add::eval(RefEnv &env) 
+Result Add::eval() 
 {
     // evaluate the children
-    Result l = left()->eval(env);
-    Result r = right()->eval(env);
+    Result l = left()->eval();
+    Result r = right()->eval();
 
     // get the type of the result
     Result result;
@@ -403,11 +369,11 @@ Sub::Sub(LexerToken _token) : BinaryOp(_token)
 }
 
 
-Result Sub::eval(RefEnv &env) 
+Result Sub::eval() 
 {
     // evaluate the children
-    Result l = left()->eval(env);
-    Result r = right()->eval(env);
+    Result l = left()->eval();
+    Result r = right()->eval();
 
     // get the type of the result
     Result result;
@@ -430,11 +396,11 @@ Mul::Mul(LexerToken _token) : BinaryOp(_token)
 }
 
 
-Result Mul::eval(RefEnv &env) 
+Result Mul::eval() 
 {
     // evaluate the children
-    Result l = left()->eval(env);
-    Result r = right()->eval(env);
+    Result l = left()->eval();
+    Result r = right()->eval();
 
     // get the type of the result
     Result result;
@@ -457,11 +423,11 @@ Div::Div(LexerToken _token) : BinaryOp(_token)
 }
 
 
-Result Div::eval(RefEnv &env) 
+Result Div::eval() 
 {
     // evaluate the children
-    Result l = left()->eval(env);
-    Result r = right()->eval(env);
+    Result l = left()->eval();
+    Result r = right()->eval();
 
     // get the type of the result
     Result result;
@@ -484,11 +450,11 @@ Pow::Pow(LexerToken _token) : BinaryOp(_token)
 }
 
 
-Result Pow::eval(RefEnv &env) 
+Result Pow::eval() 
 {
     // evaluate the children
-    Result l = left()->eval(env);
-    Result r = right()->eval(env);
+    Result l = left()->eval();
+    Result r = right()->eval();
 
     // get the type of the result
     Result result;
@@ -511,10 +477,10 @@ Neg::Neg(LexerToken _token) : UnaryOp(_token)
 }
 
 
-Result Neg::eval(RefEnv &env)
+Result Neg::eval()
 {
     //eval the child and then negate it
-    Result result = child()->eval(env);
+    Result result = child()->eval();
     NUM_ASSIGN(result, -NUM_RESULT(result));
 
     return result;
@@ -546,7 +512,7 @@ Number::Number(LexerToken _token) : ParseTree(_token)
 }
 
 
-Result Number::eval(RefEnv &env)
+Result Number::eval()
 {
     return _val;
 }
@@ -602,31 +568,19 @@ void ParseTree::print_prefix(int depth) const
 }
 
 
-//////////////////////////////////////////
-// Accessor Implementation
-//////////////////////////////////////////
-Accessor::Accessor(LexerToken _token) : ParseTree(_token)
-{
-}
-
 
 //////////////////////////////////////////
 // Var Implementation
 //////////////////////////////////////////
-Var::Var(LexerToken _token) : Accessor(_token)
+
+Var::Var(LexerToken _token) : ParseTree(_token)
 {
 }
 
 
-Result Var::eval(RefEnv &env)
+Result Var::eval()
 {
-    return eval_ref(env);
-}
-
-
-Result& Var::eval_ref(RefEnv &env)
-{
-    return env[token().lexeme];
+    return env[token().lexeme];;
 }
 
 
@@ -638,16 +592,32 @@ Print::Print(LexerToken _token) : UnaryOp(_token)
 }
 
 
-Result Print::eval(RefEnv &env)
+Result Print::eval()
 {
     Result result;
     result.type = VOID;
 
     //print the result of the child
-    std::cout << child()->eval(env) << std::endl;
+    std::cout << child()->eval() << std::endl;
 
     return result;
 }
+
+//////////////////////////////////////////
+// AlphaNumeric Implementation
+//////////////////////////////////////////
+AlphaNumeric::AlphaNumeric(LexerToken _token) : Print(_token) {}
+
+Result AlphaNumeric::eval() {
+    Result result;
+    result.type = VOID;
+
+    //print the alphanumberic string provided in the child
+    std::cout << child()->token().lexeme;
+    return result;
+}
+
+
 
 
 //////////////////////////////////////////
@@ -657,15 +627,22 @@ VarDecl::VarDecl(LexerToken _token) : UnaryOp(_token)
 {
 }
 
-
-Result VarDecl::eval(RefEnv &env)
+Result VarDecl::eval()
 {
     ResultType var_type;
     Result result;
     result.type = VOID;
 
     //get the variable type
-    var_type = token_to_type(token().token);
+    switch(token().token)
+    {
+        case INTEGER_DECL:
+            var_type = INTEGER;
+            break;
+        case REAL_DECL:
+            var_type = REAL;
+            break;
+    }
 
     //perform the declaration
     env.declare(child()->token().lexeme, var_type);
@@ -682,17 +659,14 @@ Assign::Assign(LexerToken _token) : BinaryOp(_token)
 }
 
 
-Result Assign::eval(RefEnv &env)
+Result Assign::eval()
 {
-
     // get the value and name to assign
-    Result val = right()->eval(env);
+    Result val = right()->eval();
     std::string name = left()->token().lexeme;
 
     //perform the assignment
-    Accessor *var = (Accessor*) left();
-    Result &var_ref = var->eval_ref(env);
-    NUM_ASSIGN(var_ref, NUM_RESULT(val));
+    NUM_ASSIGN(env[name], NUM_RESULT(val));
 
     Result result;
     result.type = VOID;
@@ -709,20 +683,8 @@ ArrayDecl::ArrayDecl(LexerToken _token) : BinaryOp(_token)
 }
 
 
-Result ArrayDecl::eval(RefEnv &env)
+Result ArrayDecl::eval()
 {
-    // get the bounds
-    std::vector<int> bounds;
-    NaryOp *blist = (NaryOp*) left();
-    for(auto itr = blist->begin(); itr != blist->end(); itr++) {
-        bounds.push_back((int) NUM_RESULT((*itr)->eval(env)));
-    }
-
-    //build the array and insert it into the environment
-    ArrayVar *ar = new ArrayVar(token_to_type(token().token), bounds);
-    std::string name = right()->token().lexeme;
-    env.declare(name, ARRAY_VAR);
-    env[name].val.ptr = ar;
 
     //return void
     Result result;
@@ -734,22 +696,17 @@ Result ArrayDecl::eval(RefEnv &env)
 //////////////////////////////////////////
 // ArrayAccess Implementation
 //////////////////////////////////////////
-ArrayAccess::ArrayAccess(LexerToken _token) : BinaryOp(_token), Accessor(_token)
+ArrayAccess::ArrayAccess(LexerToken _token) : BinaryOp(_token) 
 {
 }
 
-Result ArrayAccess::eval(RefEnv &env)
+Result ArrayAccess::eval()
 {
 
     //return void
     Result result;
     result.type = VOID;
     return result;
-}
-
-
-Result& ArrayAccess::eval_ref(RefEnv &env)
-{
 }
 
 
@@ -762,7 +719,7 @@ ArrayIndex::ArrayIndex(LexerToken _token) : NaryOp(_token)
 }
 
 
-Result ArrayIndex::eval(RefEnv &env)
+Result ArrayIndex::eval()
 {
 
     //return void
@@ -780,7 +737,7 @@ RecordDef::RecordDef(LexerToken _token) : NaryOp(_token)
 }
 
 
-Result RecordDef::eval(RefEnv &env)
+Result RecordDef::eval()
 {
 
     //return void
@@ -793,21 +750,16 @@ Result RecordDef::eval(RefEnv &env)
 //////////////////////////////////////////
 // RecordAccess Implementation
 //////////////////////////////////////////
-RecordAccess::RecordAccess(LexerToken _token) : BinaryOp(_token), Accessor(_token)
+RecordAccess::RecordAccess(LexerToken _token) : BinaryOp(_token)
 {
 }
 
 
-Result RecordAccess::eval(RefEnv &env)
+Result RecordAccess::eval()
 {
 
     //return void
     Result result;
     result.type = VOID;
     return result;
-}
-
-
-Result& RecordAccess::eval_ref(RefEnv &env)
-{
 }

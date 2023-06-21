@@ -74,10 +74,9 @@ ParseTree *Parser::parse_program()
 
 
 /*
- * < Statement >   ::= < Ref > < Statement' > NEWLINE
+ * < Statement >   ::= < Identifier > < Statement' > NEWLINE
  *                     | < Var-Decl > NEWLINE
  *                     | < Print > NEWLINE
- *                     | < Record-Def >
  *                     | < Expression > NEWLINE
  */
 ParseTree *Parser::parse_statement()
@@ -86,14 +85,13 @@ ParseTree *Parser::parse_statement()
 
     if(has(IDENTIFIER)) {
         // statement which begin with an identifier
-        ParseTree *var = parse_ref();
+        ParseTree *var = new Var(curtok());
+        next();
         result = parse_statement_prime(var);
     } else if(has(INTEGER_DECL) or has(REAL_DECL)) {
         result = parse_var_decl();
     } else if(has(PRINT)) {
         result = parse_print();
-    } else if(has(RECORD)) {
-        result = parse_record_def();
     } else {
         result = parse_expression();
     }
@@ -108,7 +106,6 @@ ParseTree *Parser::parse_statement()
 
 /*
  * < Statement' >  ::= EQUAL < Expression > 
- *                     | < Record-Decl' >
  *                     | < Expression' >
  */
 ParseTree *Parser::parse_statement_prime(ParseTree *left)
@@ -120,8 +117,6 @@ ParseTree *Parser::parse_statement_prime(ParseTree *left)
         result->left(left);
         result->right(parse_expression());
         return result;
-    } else if(has(IDENTIFIER)) {
-        return parse_record_decl_prime(left);
     } else {
         return parse_expression_prime(left);
     }
@@ -130,146 +125,14 @@ ParseTree *Parser::parse_statement_prime(ParseTree *left)
 
 /*
  * < Var-Decl >    ::= < Type > < Identifier >
- *                     | < Type > LBRACKET < Bounds > RBRACKET IDENTIFIER
- *                     | < Record-Decl >
  */
 ParseTree *Parser::parse_var_decl()
 {
-    LexerToken token = curtok();
-
-    if(token == IDENTIFIER) {
-        return parse_record_decl();
-    }
-
+    VarDecl *result = new VarDecl(curtok());
     next();
-
-    if(curtok() == LBRACKET) {
-        ArrayDecl *result = new ArrayDecl(token);
-        next();
-        result->left(parse_bounds());
-        must_be(RBRACKET);
-        next();
-        must_be(IDENTIFIER);
-        result->right(new Var(curtok()));
-        next();
-        return result;
-    } else {
-        must_be(IDENTIFIER);
-        VarDecl *result = new VarDecl(token);
-        result->child(new Var(curtok()));
-        next();
-        return result;
-    }
-}
-
-
-/*
- * < Record-Decl > ::= IDENTIFIER < Record-Decl' >
- */
-ParseTree *Parser::parse_record_decl()
-{
     must_be(IDENTIFIER);
-    Var *left = new Var(curtok());
-    return parse_record_decl_prime(left);
-}
-
-
-/*
- * < Record-Decl' >::= IDENTIFIER
- *                     | LBRACKET < Bounds > RBRACKET IDENTIFIER
- */
-ParseTree *Parser::parse_record_decl_prime(ParseTree *left)
-{
-    //really, we just want the token to get the record type
-    LexerToken token = left->token();
-    delete left;
-
-    //check for array declaration
-    if(has(LBRACKET)) {
-        next();
-        ArrayDecl *result = new ArrayDecl(token);
-        result->left(parse_bounds());
-        must_be(RBRACKET);
-        next();
-        must_be(IDENTIFIER);
-        result->right(new Var(curtok()));
-        next();
-        return result;
-    }
-
-    //scalar record declaration
-    must_be(IDENTIFIER);
-    VarDecl *result = new VarDecl(token);
     result->child(new Var(curtok()));
     next();
-    return result;
-}
-
-
-/*
- * < Record-Def >  ::= RECORD IDENTIFIER NEWLINE < Fields > END
- */
-ParseTree *Parser::parse_record_def()
-{
-    // probably not needed, but let's just double check
-    must_be(RECORD);
-
-    //make the result object
-    next();
-    must_be(IDENTIFIER);
-    RecordDef *result = new RecordDef(curtok());
-    next();
-    must_be(NEWLINE);
-    next();
-
-    //add the fields
-    parse_fields(result);
-
-    //consume end
-    must_be(END);
-    next();
-
-    return result;
-}
-
-
-/*
- * < Fields >      ::= < Fields > < Var-Decl > NEWLINE
- *                     | < Var-Decl > NEWLINE
- */
-ParseTree *Parser::parse_fields(NaryOp *obj)
-{
-    // read all of the declarations
-    while(has(INTEGER_DECL) or has(REAL_DECL) or has(IDENTIFIER)) {
-        obj->push(parse_var_decl());
-        must_be(NEWLINE);
-        next();
-    }
-
-    return obj;
-}
-
-
-/*
- * < Bounds >      ::= < Bounds > COMMA INTLIT
- *                     | INTLIT
- */
-ParseTree *Parser::parse_bounds() 
-{
-    bool done = false;
-    ArrayIndex *result = new ArrayIndex(curtok());
-
-    do {
-        must_be(INTLIT);
-        result->push(parse_number());
-
-        //keep going so long as there is a comma
-        if(has(COMMA)) {
-            next();
-        } else {
-            done = true;
-        }
-    } while(not done);
 
     return result;
 }
@@ -282,8 +145,27 @@ ParseTree *Parser::parse_print()
 {
     Print *result = new Print(curtok());
     next();
-    result->child(parse_expression());
+    if (has(DOUBLE_QUOTES)) {
+           next();
+           result->child(parse_alpha_numeric());
+    } else {
+        result->child(parse_expression());
+    }
     return result;
+}
+
+ParseTree *Parser::parse_alpha_numeric() {
+    std::string printable = "";
+    while (not has(DOUBLE_QUOTES)) {
+        printable = printable + curtok().lexeme + " ";
+        next();
+    }
+    next();
+    LexerToken tok;
+    tok.lexeme = printable;
+    AlphaNumeric *alpha = new AlphaNumeric(tok);
+    alpha->child(new Var(tok));
+    return alpha;
 }
 
 
@@ -426,7 +308,8 @@ ParseTree *Parser::parse_number()
     ParseTree *result;
 
     if(has(IDENTIFIER)) {
-        result = parse_ref();
+        result = new Var(curtok());
+        next();
     } else if(has(INTLIT)) {
         result = new Number(curtok());
         next();
@@ -438,74 +321,6 @@ ParseTree *Parser::parse_number()
 
     return result;
 }
-
-
-/*
- * < Index >       ::= < Index > COMMA < Expression >
- *                     | < Expression >
- */
-ParseTree *Parser::parse_index() 
-{
-    bool done = false;
-    ArrayIndex *result = new ArrayIndex(curtok());
-
-    do {
-        result->push(parse_expression());
-
-        //keep going so long as there is a comma
-        if(has(COMMA)) {
-            next();
-        } else {
-            done = true;
-        }
-    } while(not done);
-
-    return result;
-}
-
-
-
-/*
- * < Ref >         ::= IDENTIFIER < Ref' >
- */
-ParseTree *Parser::parse_ref()
-{
-    must_be(IDENTIFIER);
-    Var *result = new Var(curtok());
-    next();
-
-    return parse_ref_prime(result);
-}
-
-
-
-/*
- *  < Ref' >        ::= DOT < Ref >
- *                      | LBRACKET < Index > RBracket
- *                      | ""
- */
-ParseTree *Parser::parse_ref_prime(ParseTree *left)
-{
-    if(has(DOT)) {
-        RecordAccess *result = new RecordAccess(curtok());
-        next();
-        result->left(left);
-        result->right(parse_ref());
-        return result;
-    } else if(has(LBRACKET)) {
-        ArrayAccess *result = new ArrayAccess(curtok());
-        next();
-        result->left(left);
-        result->right(parse_index());
-        must_be(RBRACKET);
-        next();
-        return result;
-    }
-
-    //must be the null string case.
-    return left;
-}
-
 
 
 //////////////////////////////////////////

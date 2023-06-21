@@ -15,7 +15,6 @@ union ResultField
 {
     int i;
     double r;
-    void *ptr;  // Pointer to other field types
 };
 
 
@@ -23,10 +22,7 @@ enum ResultType
 {
     VOID=0,
     INTEGER,
-    REAL,
-    RECORD_DEF,
-    RECORD_VAR,
-    ARRAY_VAR
+    REAL
 };
 
 
@@ -86,7 +82,7 @@ public:
     virtual LexerToken token() const;
 
     // evaluate the parse tree
-    virtual Result eval(RefEnv &env)=0;
+    virtual Result eval()=0;
 
     // print the tree (for debug purposes)
     virtual void print(int depth) const;
@@ -177,7 +173,7 @@ class Program : public NaryOp
 {
 public:
     Program(LexerToken _token);
-    virtual Result eval(RefEnv &env);
+    virtual Result eval();
     virtual void print(int depth) const;
 };
 
@@ -187,7 +183,7 @@ class Add : public BinaryOp
 {
 public:
     Add(LexerToken _token);
-    virtual Result eval(RefEnv &env);
+    virtual Result eval();
 };
 
 
@@ -196,7 +192,7 @@ class Sub : public BinaryOp
 {
 public:
     Sub(LexerToken _token);
-    virtual Result eval(RefEnv &env);
+    virtual Result eval();
 };
 
 
@@ -205,7 +201,7 @@ class Mul: public BinaryOp
 {
 public:
     Mul(LexerToken _token);
-    virtual Result eval(RefEnv &env);
+    virtual Result eval();
 };
 
 
@@ -214,7 +210,7 @@ class Div: public BinaryOp
 {
 public:
     Div(LexerToken _token);
-    virtual Result eval(RefEnv &env);
+    virtual Result eval();
 };
 
 
@@ -223,7 +219,7 @@ class Pow: public BinaryOp
 {
 public:
     Pow(LexerToken _token);
-    virtual Result eval(RefEnv &env);
+    virtual Result eval();
 };
 
 
@@ -232,7 +228,7 @@ class Neg: public UnaryOp
 {
 public:
     Neg(LexerToken _token);
-    virtual Result eval(RefEnv &env);
+    virtual Result eval();
     virtual void print(int depth) const;
 };
 
@@ -242,28 +238,18 @@ class Number: public ParseTree
 {
 public:
     Number(LexerToken _token);
-    virtual Result eval(RefEnv &env);
+    virtual Result eval();
 protected:
     Result _val;
 };
 
 
-// Abstract class for accessing records
-class Accessor : public ParseTree
-{
-public:
-    Accessor(LexerToken _token);
-    virtual Result& eval_ref(RefEnv &env)=0;
-};
-
-
 // A Variable Retrieval
-class Var: public Accessor
+class Var: public ParseTree
 {
 public:
     Var(LexerToken _token);
-    virtual Result eval(RefEnv &env);
-    virtual Result &eval_ref(RefEnv &env);
+    virtual Result eval();
 };
 
 
@@ -272,16 +258,29 @@ class Print: public UnaryOp
 {
 public:
     Print(LexerToken _token);
-    virtual Result eval(RefEnv &env);
+    virtual Result eval();
 };
 
+class AlphaNumeric : public Print
+{
+public:
+    AlphaNumeric(LexerToken _token);
+    virtual Result eval();
+};
+
+class Println: public UnaryOp
+{
+public:
+    Println(LexerToken _token);
+    virtual Result eval();
+};
 
 // A variable declaration operation
 class VarDecl: public UnaryOp 
 {
 public:
     VarDecl(LexerToken _token);
-    virtual Result eval(RefEnv &env);
+    virtual Result eval();
 };
 
 
@@ -290,7 +289,7 @@ class Assign : public BinaryOp
 {
 public:
     Assign(LexerToken _token);
-    virtual Result eval(RefEnv &env);
+    virtual Result eval();
 };
 
 
@@ -299,17 +298,16 @@ class ArrayDecl: public BinaryOp
 {
 public:
     ArrayDecl(LexerToken _token);
-    virtual Result eval(RefEnv &env);
+    virtual Result eval();
 };
 
 
 // An array Access operation
-class ArrayAccess: public BinaryOp, public Accessor
+class ArrayAccess: public BinaryOp 
 {
 public:
     ArrayAccess(LexerToken _token);
-    virtual Result eval(RefEnv &env);
-    virtual Result &eval_ref(RefEnv &env);
+    virtual Result eval();
 };
 
 
@@ -318,7 +316,7 @@ class ArrayIndex: public NaryOp
 {
 public:
     ArrayIndex(LexerToken _token);
-    virtual Result eval(RefEnv &env);
+    virtual Result eval();
 };
 
 
@@ -327,16 +325,15 @@ class RecordDef: public NaryOp
 {
 public:
     RecordDef(LexerToken _token);
-    virtual Result eval(RefEnv &env);
+    virtual Result eval();
 };
 
 
 // A record access operation
-class RecordAccess: public BinaryOp, public Accessor
+class RecordAccess: public BinaryOp
 {
 public:
     RecordAccess(LexerToken _token);
-    virtual Result eval(RefEnv &env);
-    virtual Result &eval_ref(RefEnv &env);
+    virtual Result eval();
 };
 #endif

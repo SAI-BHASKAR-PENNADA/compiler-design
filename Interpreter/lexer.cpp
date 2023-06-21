@@ -29,7 +29,8 @@ const char* TSTR[] = {
     "RBRACKET",
     "COMMA",
     "DOT",
-    "DOUBLE_QUOTES"
+    "DOUBLE_QUOTES",
+    "SCANF"
 };
 
 
@@ -331,7 +332,10 @@ bool Lexer::lex_kw_id()
     // match our keywords
     if(_curtok.lexeme == "print") {
         _curtok.token = PRINT;
-    } else if(_curtok.lexeme == "integer") {
+    } else if(_curtok.lexeme == "scanf") {
+        _curtok.token = SCANF;
+    }
+    else if(_curtok.lexeme == "integer") {
         _curtok.token = INTEGER_DECL;
     } else if(_curtok.lexeme == "real") {
         _curtok.token = REAL_DECL;

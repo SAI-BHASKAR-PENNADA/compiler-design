@@ -32,6 +32,7 @@ enum Token
     COMMA,
     DOT,
     DOUBLE_QUOTES,
+    SCANF
 };
 
 // translate tokens into strings for easy debugging

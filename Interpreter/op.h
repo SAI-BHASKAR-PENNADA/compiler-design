@@ -275,6 +275,14 @@ public:
     virtual Result eval();
 };
 
+// A SCANF operation
+class ScanF : public ParseTree
+{
+public:
+    ScanF(LexerToken _token);
+    virtual Result eval();
+};
+
 // A variable declaration operation
 class VarDecl: public UnaryOp 
 {

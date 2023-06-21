@@ -604,6 +604,30 @@ Result Print::eval()
 }
 
 //////////////////////////////////////////
+// ScanF Implementation
+//////////////////////////////////////////
+ScanF::ScanF(LexerToken _token) : ParseTree(_token) {}
+
+Result ScanF::eval() {
+    int userInput;
+    double userIp;
+    std::cout << "Value for " << token().lexeme << ": ";
+
+
+    // check type of the variable
+    Result var = env[token().lexeme];
+    if (var.type == INTEGER) {
+        std::cin >> userInput;
+        var.val.i = userInput;
+    } else if (var.type == REAL) {
+        std::cin >> userIp;
+        var.val.r = userIp;
+    }
+    env[token().lexeme] = var;
+}
+
+
+//////////////////////////////////////////
 // AlphaNumeric Implementation
 //////////////////////////////////////////
 AlphaNumeric::AlphaNumeric(LexerToken _token) : Print(_token) {}

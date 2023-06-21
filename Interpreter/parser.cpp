@@ -92,6 +92,8 @@ ParseTree *Parser::parse_statement()
         result = parse_var_decl();
     } else if(has(PRINT)) {
         result = parse_print();
+    } else if(has(SCANF)) {
+        result = parse_scanf();
     } else {
         result = parse_expression();
     }
@@ -168,7 +170,17 @@ ParseTree *Parser::parse_alpha_numeric() {
     return alpha;
 }
 
-
+ParseTree *Parser::parse_scanf() {
+    next();
+    must_be(LPAREN);
+    next();
+    must_be(IDENTIFIER);
+    ScanF *scanner =  new ScanF(curtok());
+    next();
+    must_be(RPAREN);
+    next();
+    return scanner;
+}
 
 /*
  * < Expression >  ::= < Term > < Expression' >

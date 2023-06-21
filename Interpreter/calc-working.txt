@@ -1,15 +1,36 @@
-Parser Grammar
-==============
-< Program >     ::= < Program > < Statement > 
-                    | < Statement >
+< Program >     ::= < Program > < Statement >
+                    	| < Statement >
 
 < Statement >   ::= < Ref > < Statement' > NEWLINE
                     | < Var-Decl > NEWLINE
                     | < Record-Def >
                     | < Print > NEWLINE
+                    | SCANF LPAREN < Identifier > RPAREN NEWLINE
                     | < Expression > NEWLINE
+                    | IF LPAREN < Boolean_Condition > RPAREN COLON NEWLINE <Stmt_List> ENDIF NEWLINE
+	                | WHILE LPAREN < Boolean_Condition > RPAREN COLON NEWLINE <Stmt_List> ENDWHILE NEWLINE
 
-< Statement' >  ::= EQUAL < Expression > 
+                    | CLASS < Identifier > COLON NEWLINE < Class_Body > CLASSEND NEWLINE
+
+                    | CLASS < Identifier > DERIVED < Identifier > COLON NEWLINE < Class_Body > CLASSEND NEWLINE
+
+                    | < Identifier > ISA < Identifer>
+                    | < Identifier > DOT < Identifier > LPAREN < Argument_List > RPAREN NEWLINE
+                    | < Identifier > DOT < Identifier > NEWLINE
+                    | < Identifier > LPAREN < Argument_List > RPAREN NEWLINE
+
+< Access_Modifier >  ::= PUBLIC | PRIVATE | PROTECTED | ""
+
+< Class_Body > ::= < Func_Def > < Class_Body > | < Access_Modifier > < Var-Decl > < Class_Body > | ""
+
+< Boolean_Condition >   ::= < Expression > LESSTHAN < EXPRESSION >
+                            | < Expression > EQUALITY < EXPRESSION >
+                            | < Expression > NOTEQUAL < EXPRESSION >
+                            | < Expression > GREATERTHAN < EXPRESSION >
+
+<Stmt_List>        ::= <Stmt_List> < Statement > | < Statement >
+
+< Statement' >  ::= EQUAL < Expression >
                     | < Record-Decl' >
                     | < Expression' >
 
@@ -17,7 +38,19 @@ Parser Grammar
                     | < Type > LBRACKET < Bounds > RBRACKET IDENTIFIER
                     | < Record-Decl >
 
-< Type >        ::= INTEGER | REAL 
+< Func_Def >     ::= DEF < Identifier > LPAREN <Parameter_List> RPAREN COLON NEWLINE <Stmt_List>
+		ENDDEF NEWLINE
+
+< Parameter_List > ::= < Var_Decl > < Parameter_List' > | ""
+
+< Parameter_List' >  ::= COMMA < Var_Decl > < Parameter_List' > | ""
+
+< Argument_List >  ::= < Expression > < Argument_List' > | ""
+
+< Argument_List' >  ::= COMMA < Expression > < Argument_List' > | ""
+
+
+< Type >        ::= INTEGER | REAL
 
 < Record-Decl > ::= IDENTIFIER < Record-Decl' >
 
@@ -32,14 +65,15 @@ Parser Grammar
 < Bounds >      ::= < Bounds > COMMA INTLIT
                     | INTLIT
 
-< Print >       ::= PRINT < Expression >
+< Print >       ::= PRINT < Expression > | PRINTLN < Expression > |
+                    PRINT QUOTE ALPHANUMERIC QUOTE | PRINTLN QUOTE ALPHANUMERIC QUOTE
 
 < Expression >  ::= < Term > < Expression' >
 
 < Expression' > ::= PLUS < Term  > < Expression' >
                     | MINUS < Term > < Expression' >
                     | ""
-                    
+
 < Term >        ::= < Factor > < Term' >
 
 < Term' >       ::= TIMES  < Factor > < Term' >
@@ -50,7 +84,7 @@ Parser Grammar
                     | < Base >
 
 < Base >        ::= LPAREN < Expression > RPAREN
-                    | MINUS < Expression > 
+                    | MINUS < Expression >
                     | < Number >
 
 < Number >      ::= INTLIT
@@ -66,6 +100,7 @@ Parser Grammar
                     | ""
 
 < Index >       ::= < Index > COMMA < Expression >
+
 
 
 

@@ -190,13 +190,17 @@ ParseTree *Parser::parse_if() {
     // add the condition to the left child and the statemnt block to the right child
     ifs->left(parse_condition_expression());
     Statementblock *ifblock = new Statementblock(curtok());
-    while ( (ifs->token().token == IF and not has(ENDIF))|| (ifs->token().token == WHILE and not has(ENDWHILE))) {
-        // add all the statement to right child of the if node
-        ifblock->push(parse_statement());
-    }
     if (ifs->token().token == IF) {
+        while (not has(ENDIF)) {
+            // add all the statement to right child of the if node
+            ifblock->push(parse_statement());
+        }
         must_be(ENDIF);
-    } else if(ifs->token().token == WHILE) {
+    } else {
+        while (not has(ENDWHILE)) {
+            // add all the statement to right child of the if node
+            ifblock->push(parse_statement());
+        }
         must_be(ENDWHILE);
     }
     next();

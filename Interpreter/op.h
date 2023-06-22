@@ -291,6 +291,14 @@ public:
     virtual Result eval();
 };
 
+// A conditional op
+class ConditionalOp: public BinaryOp
+{
+public:
+    ConditionalOp(LexerToken _token);
+    virtual Result eval();
+};
+
 // can have a bunch of statemetns - used for if/while blocks or for functiosn in future ?
 class Statementblock: public NaryOp
 {

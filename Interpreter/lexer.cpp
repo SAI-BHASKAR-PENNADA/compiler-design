@@ -32,7 +32,12 @@ const char* TSTR[] = {
     "DOUBLE_QUOTES",
     "SCANF",
     "IF",
-    "ENDIF"
+    "ENDIF",
+    "CONDITIONALOP",
+    "IS",
+    "ISTO",
+    "WHILE",
+    "WHILEEND"
 };
 
 
@@ -123,6 +128,7 @@ LexerToken Lexer::next()
     } else if(lex_number()) {
         return current();
     } else if(lex_kw_id()) {
+        //std::cout << "keyword found " << current() << std::endl;
         return current();
     } else {
         // nothing matched, consume and move on
@@ -265,6 +271,18 @@ bool Lexer::lex_single()
             _curtok.token = DOT;
             break;
 
+        case '<':
+            _curtok.token = CONDITIONALOP;
+            break;
+        case '>':
+            _curtok.token = CONDITIONALOP;
+            break;
+        case '~':
+            _curtok.token = CONDITIONALOP;
+            break;
+        case ':':
+            _curtok.token = ISTO;
+            break;
         default:
             return false;
     }
@@ -334,12 +352,16 @@ bool Lexer::lex_kw_id()
     // match our keywords
     if(_curtok.lexeme == "print") {
         _curtok.token = PRINT;
+    } else if(_curtok.lexeme == "while") {
+      _curtok.token = WHILE;
+    } else if(_curtok.lexeme == "endwhile") {
+        _curtok.token = ENDWHILE;
     } else if(_curtok.lexeme == "scanf") {
         _curtok.token = SCANF;
     } else if(_curtok.lexeme == "if") {
-        _curtok.lexeme = IF;
+        _curtok.token = IF;
     } else if(_curtok.lexeme == "endif") {
-        _curtok.lexeme = ENDIF;
+        _curtok.token = ENDIF;
     } else if(_curtok.lexeme == "integer") {
         _curtok.token = INTEGER_DECL;
     } else if(_curtok.lexeme == "real") {
@@ -348,6 +370,8 @@ bool Lexer::lex_kw_id()
         _curtok.token = RECORD;
     } else if(_curtok.lexeme == "end") {
         _curtok.token = END;
+    } else if(_curtok.lexeme == "is") {
+        _curtok.token = CONDITIONALOP;
     }
 
     return true;

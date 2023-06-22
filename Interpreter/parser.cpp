@@ -82,7 +82,6 @@ ParseTree *Parser::parse_program()
 ParseTree *Parser::parse_statement()
 {
     ParseTree *result;
-
     if(has(IDENTIFIER)) {
         // statement which begin with an identifier
         ParseTree *var = new Var(curtok());
@@ -90,7 +89,8 @@ ParseTree *Parser::parse_statement()
         result = parse_statement_prime(var);
     } else if(has(INTEGER_DECL) or has(REAL_DECL)) {
         result = parse_var_decl();
-    } else if(has(IF)) {
+    } else if(has(IF) || has(WHILE)) {
+        std::cout << "if or while\n";
         result = parse_if();
     } else if(has(PRINT)) {
         result = parse_print();
@@ -185,19 +185,22 @@ ParseTree *Parser::parse_scanf() {
 }
 
 ParseTree *Parser::parse_if() {
-    next();
     IfStatement *ifs = new IfStatement(curtok());
     next();
-
     // add the condition to the left child and the statemnt block to the right child
     ifs->left(parse_condition_expression());
     Statementblock *ifblock = new Statementblock(curtok());
-    while (not has(ENDIF)) {
+    while ( (ifs->token().token == IF and not has(ENDIF))|| (ifs->token().token == WHILE and not has(ENDWHILE))) {
         // add all the statement to right child of the if node
         ifblock->push(parse_statement());
     }
-    ifs->right(ifblock);
+    if (ifs->token().token == IF) {
+        must_be(ENDIF);
+    } else if(ifs->token().token == WHILE) {
+        must_be(ENDWHILE);
+    }
     next();
+    ifs->right(ifblock);
     return ifs;
 }
 
@@ -206,8 +209,18 @@ ParseTree *Parser::parse_condition_expression() {
     must_be(LPAREN);
     next();
     // need to write logic for collecting <expression> operator <expression>
+    auto it = parse_expression();
+    ConditionalOp *op = new ConditionalOp(curtok());
+    next();
+    op->left(it);
+    op->right(parse_expression());
     must_be(RPAREN);
-    return result;
+    next();
+    must_be(ISTO);
+    next();
+    must_be(NEWLINE);
+    next();
+    return op;
 }
 
 /*

@@ -34,7 +34,12 @@ enum Token
     DOUBLE_QUOTES,
     SCANF,
     IF,
-    ENDIF
+    ENDIF,
+    CONDITIONALOP,
+    IS,
+    ISTO,
+    WHILE,
+    ENDWHILE
 };
 
 // translate tokens into strings for easy debugging

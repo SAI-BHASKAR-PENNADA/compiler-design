@@ -630,11 +630,38 @@ Result ScanF::eval() {
 IfStatement::IfStatement(LexerToken _token) : BinaryOp(_token){}
 
 Result IfStatement::eval() {
-    // check if condition and then execute the if block
-    if (left()->eval().val.i == 1 && left()->eval().type == VOID) {
-        // evaluate the block
-        right()->eval();
+    if (token() == IF) {
+        // check if condition and then execute the if block
+        if (left()->eval().val.i == 1 && left()->eval().type == VOID) {
+            // evaluate the block
+            right()->eval();
+        }
+    } else if(token() == WHILE) {
+        while(left()->eval().val.i == 1 && left()->eval().type == VOID) {
+            right()->eval();
+        }
     }
+}
+
+//////////////////////////////////////////
+// ConditionalOp Implementation
+//////////////////////////////////////////
+ConditionalOp::ConditionalOp(LexerToken _token) : BinaryOp(_token){}
+
+Result ConditionalOp::eval() {
+    Result result;
+    result.type = VOID;
+
+    if (token().lexeme == "<") {
+        result.val.i = left()->eval().val.i < right()->eval().val.i;
+    } else if (token().lexeme == ">") {
+        result.val.i = left()->eval().val.i > right()->eval().val.i;
+    } else if (token().lexeme == "is") {
+        result.val.i = left()->eval().val.i == right()->eval().val.i;
+    } else if (token().lexeme == "is") {
+        result.val.i = left()->eval().val.i != right()->eval().val.i;
+    }
+    return result;
 }
 
 //////////////////////////////////////////

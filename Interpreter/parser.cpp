@@ -132,7 +132,14 @@ ParseTree *Parser::parse_statement_prime(ParseTree *left)
  */
 ParseTree *Parser::parse_var_decl()
 {
-    VarDecl *result = new VarDecl(curtok());
+    LexerToken integerOrReal = curtok();
+    next();
+
+    if (has(LBRACKET)) {
+        next();
+        return parse_array_init(integerOrReal);
+    }
+    VarDecl *result = new VarDecl(integerOrReal);
     next();
     must_be(IDENTIFIER);
     result->child(new Var(curtok()));
@@ -141,6 +148,16 @@ ParseTree *Parser::parse_var_decl()
     return result;
 }
 
+
+ParseTree *Parser::parse_array_init(LexerToken _token) {
+    ArrayInit *arrinit = new ArrayInit(_token);
+    arrinit->push(parse_number());
+    must_be(RBRACKET);
+    next();
+    arrinit->push(new Var(curtok()));
+    next();
+    return arrinit;
+}
 
 /*
  * < Print >       ::= PRINT < Expression >

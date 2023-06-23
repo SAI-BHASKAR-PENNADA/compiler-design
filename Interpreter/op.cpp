@@ -691,6 +691,31 @@ Result Statementblock::eval() {
 }
 
 //////////////////////////////////////////
+// ArrayInit Implementation
+//////////////////////////////////////////
+ArrayInit::ArrayInit(LexerToken _token) : NaryOp(_token) {}
+
+Result ArrayInit::eval() {
+    //initialize an array in the env
+    Result arr;
+    int size = (*begin())->eval().val.i;
+    if (token() == INTEGER_DECL) {
+        arr.val.arr.isInt = true;         // set if it an int array or real array
+        arr.val.arr.ptr = new int[size];  // create new array
+    }
+    else {
+        arr.val.arr.isInt = false;
+        arr.val.arr.ptr = new double[size];
+    }
+    arr.val.arr.size = size;
+
+    // next add the Result to env
+    std::string name = (*(begin() + 1))->token().lexeme;
+    env[name].type = ARRAY;
+    env[name].val = arr;
+}
+
+//////////////////////////////////////////
 // VarDecl Implementation
 //////////////////////////////////////////
 VarDecl::VarDecl(LexerToken _token) : UnaryOp(_token)

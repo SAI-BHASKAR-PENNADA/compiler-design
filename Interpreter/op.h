@@ -11,10 +11,17 @@
 //////////////////////////////////////////
 // Multi-Typed Result Returns
 //////////////////////////////////////////
+struct arrstruct {
+    int size;
+    void *ptr;
+    bool isInt;
+};
+
 union ResultField
 {
     int i;
     double r;
+    struct arrstruct arr;
 };
 
 
@@ -22,7 +29,8 @@ enum ResultType
 {
     VOID=0,
     INTEGER,
-    REAL
+    REAL,
+    ARRAY
 };
 
 
@@ -272,6 +280,13 @@ class Println: public UnaryOp
 {
 public:
     Println(LexerToken _token);
+    virtual Result eval();
+};
+
+class ArrayInit: public NaryOp
+{
+public:
+    ArrayInit(LexerToken _token);
     virtual Result eval();
 };
 

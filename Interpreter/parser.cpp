@@ -90,7 +90,6 @@ ParseTree *Parser::parse_statement()
     } else if(has(INTEGER_DECL) or has(REAL_DECL)) {
         result = parse_var_decl();
     } else if(has(IF) || has(WHILE)) {
-        std::cout << "if or while\n";
         result = parse_if();
     } else if(has(PRINT)) {
         result = parse_print();
@@ -140,7 +139,6 @@ ParseTree *Parser::parse_var_decl()
         return parse_array_init(integerOrReal);
     }
     VarDecl *result = new VarDecl(integerOrReal);
-    next();
     must_be(IDENTIFIER);
     result->child(new Var(curtok()));
     next();
@@ -154,6 +152,7 @@ ParseTree *Parser::parse_array_init(LexerToken _token) {
     arrinit->push(parse_number());
     must_be(RBRACKET);
     next();
+    must_be(IDENTIFIER);
     arrinit->push(new Var(curtok()));
     next();
     return arrinit;
@@ -382,8 +381,22 @@ ParseTree *Parser::parse_number()
     ParseTree *result;
 
     if(has(IDENTIFIER)) {
-        result = new Var(curtok());
+        std::cout << curtok() << "\n";
+        LexerToken variableName = curtok();
         next();
+        if (not has(LBRACKET)) {
+            result = new Var(variableName);
+        } else {
+
+            result = new Var(variableName);
+            next();
+            ArrayAccess *res = new ArrayAccess(variableName);
+            res->left(result);
+            res->right(parse_expression());
+            must_be(RBRACKET);
+            next();
+            return res;
+        }
     } else if(has(INTLIT)) {
         result = new Number(curtok());
         next();

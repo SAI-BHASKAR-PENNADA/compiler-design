@@ -283,6 +283,7 @@ public:
     virtual Result eval();
 };
 
+// to declare an array
 class ArrayInit: public NaryOp
 {
 public:

@@ -699,6 +699,7 @@ Result ArrayInit::eval() {
     //initialize an array in the env
     Result arr;
     int size = (*begin())->eval().val.i;
+
     if (token() == INTEGER_DECL) {
         arr.val.arr.isInt = true;         // set if it an int array or real array
         arr.val.arr.ptr = new int[size];  // create new array
@@ -711,8 +712,9 @@ Result ArrayInit::eval() {
 
     // next add the Result to env
     std::string name = (*(begin() + 1))->token().lexeme;
+    env.declare(name, ARRAY);
+    env[name] = arr;
     env[name].type = ARRAY;
-    env[name].val = arr;
 }
 
 //////////////////////////////////////////
@@ -791,17 +793,22 @@ Result ArrayDecl::eval()
 //////////////////////////////////////////
 // ArrayAccess Implementation
 //////////////////////////////////////////
-ArrayAccess::ArrayAccess(LexerToken _token) : BinaryOp(_token) 
-{
-}
+ArrayAccess::ArrayAccess(LexerToken _token) : BinaryOp(_token) {}
 
 Result ArrayAccess::eval()
 {
+    // left has the array name
+    // right has the expression
+    int index = right()->eval().val.i;
+    std::string arrName = left()->token().lexeme;
 
-    //return void
-    Result result;
-    result.type = VOID;
-    return result;
+    Result arr = env[arrName];
+    int* arrayPtr = static_cast<int*>(arr.val.arr.ptr);
+    Result res;
+    res.type = arr.val.arr.isInt ? INTEGER : REAL;
+    NUM_ASSIGN(res, arrayPtr[index]);
+
+    return res;
 }
 
 

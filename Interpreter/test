@@ -5,12 +5,18 @@ class person:
         print "i am a person"
     enddef
 
-    def anotherdef():
-        print "another def"
+    def anothermethod():
+        print "another method"
     enddef
 classend
 
-howard isa person
+class employee derived person:
+
+classend
+
+ravi isa person
+
+ravi.whoareyou()
 
 integer [10] nums
 nums[2] = 13

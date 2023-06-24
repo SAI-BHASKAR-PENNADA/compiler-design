@@ -99,9 +99,9 @@ Result& RefEnv::operator[](const std::string &name)
 {
     // names must exist
     if(not exists(name)) {
+
         throw std::runtime_error(name + " not defined.");
     }
-
     return _symtab[name];
 }
 
@@ -114,6 +114,7 @@ RefEnv RefEnv::getEnv(const std::string &objName) {
 
 void RefEnv::setEnv(const std::string &objName) {
     RefEnv *newenv = new RefEnv();
+    env.declare(objName, OBJECT);
     _objtab[objName] = *newenv;
 }
 
@@ -705,6 +706,7 @@ Result Statementblock::eval() {
         (*itr)->eval();
     }
     Result res;
+    res.type = VOID;
     return res;
 }
 
@@ -894,7 +896,7 @@ Result ClassDefinition::eval() {
 }
 
 //////////////////////////////////////////
-// class definition Implementation
+// object creation Implementation
 //////////////////////////////////////////
 ObjectCreation::ObjectCreation(LexerToken _token) : UnaryOp(_token) {}
 Result ObjectCreation::eval() {
@@ -905,14 +907,41 @@ Result ObjectCreation::eval() {
 
     // create new entry for object in global env.. this holds the class name
     std::string className = child()->token().lexeme;
-    env.declare(objectName, OBJECT);
-    char *ptr = new char[objectName.length() + 1];
-    std::strcpy(ptr, objectName.c_str());
+    char *ptr = new char[className.length() + 1];
+    std::strcpy(ptr, className.c_str());
     env[objectName].val.ptr = ptr;
 
     Result res;
     return res;
 }
+
+//////////////////////////////////////////
+// object access Implementation
+//////////////////////////////////////////
+ObjectAccess::ObjectAccess(LexerToken _token) : NaryOp(_token) {}
+Result ObjectAccess::eval() {
+    // check if a function or variable
+    if ((*(begin()+1))->token() == LPAREN) {
+        //it is a function.. evaluate the function
+        std::string objName = token().lexeme;
+        std::string methodName = (*begin())->token().lexeme;
+
+        // get class name from the env
+        char *class_name = static_cast<char*>(env[objName].val.ptr);
+        // now we have class name, look for the class node
+        std::string className(class_name);
+        ClassDefinition *def = (ClassDefinition*) env[className].val.ptr; // contains the class node
+
+        // right child has the function list
+        DefDeclList *deflist = (DefDeclList*) def->right();
+        for (auto it = deflist->begin(); it != deflist->end(); it++) {
+            (*it)->eval();
+        }
+    }
+    Result res;
+    return res;
+}
+
 
 //////////////////////////////////////////
 // var declaration list Implementation

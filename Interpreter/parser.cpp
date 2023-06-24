@@ -89,12 +89,12 @@ ParseTree *Parser::parse_statement()
 
         if (has(ISA)) {
             result = parse_obj_decl(variableName);
-        } if (has(DOT)) {
+        } else if (has(DOT)) {
             result = parse_obj_access(variableName);
-        } else if (not has(LBRACKET)) {
-            result = parse_statement_prime(new Var(variableName));
-        } else {
+        } else if (has(LBRACKET)) {
             return parse_array_assign(variableName);
+        } else {
+            result = parse_statement_prime(new Var(variableName));
         }
     } else if(has(INTEGER_DECL) or has(REAL_DECL)) {
         result = parse_var_decl();

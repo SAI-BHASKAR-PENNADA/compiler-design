@@ -876,6 +876,12 @@ Result VarDeclList::eval() {
 }
 
 //////////////////////////////////////////
+// var declaration list Implementation
+//////////////////////////////////////////
+DefDeclList::DefDeclList(LexerToken _token) : NaryOp(_token) {}
+Result DefDeclList::eval() {}
+
+//////////////////////////////////////////
 // RecordDef Implementation
 //////////////////////////////////////////
 RecordDef::RecordDef(LexerToken _token) : NaryOp(_token) 

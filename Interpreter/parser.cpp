@@ -127,7 +127,8 @@ ParseTree *Parser::parse_class() {
     // store all variable declarations in left child
     def->left(parse_var_decl_list());
 
-    // store all function declarations in right child
+    // store all def declarations in right child
+    def->right(parse_def_decl_list());
 
     must_be(CLASSEND);
     next();
@@ -138,9 +139,48 @@ ParseTree *Parser::parse_var_decl_list() {
     VarDeclList *decList = new VarDeclList(curtok());
 
     // TODO - get the access modifier for the variable.
-    decList->push(parse_var_decl());
+    while (has(INTEGER_DECL) or has(REAL_DECL)) {
+        decList->push(parse_var_decl());
+        must_be(NEWLINE);
+        next();
+    }
+    return decList;
+}
+
+ParseTree *Parser::parse_def_decl_list() {
+    DefDeclList *declList = new DefDeclList(curtok());
+
+    while (has(DEF)) {
+        declList->push(parse_def());
+        must_be(NEWLINE);
+        next();
+    }
+    return declList;
+}
+
+ParseTree *Parser::parse_def() {
+    next();
+    // can re-use program node to store all statements in the function
+    Program *def = new Program(curtok());
+    next();
+
+    must_be(LPAREN);
+    next();
+    // TODO - parse parameter list
+    must_be(RPAREN);
+    next();
+
+    must_be(ISTO);
+    next();
+
     must_be(NEWLINE);
     next();
+
+    while (not has(ENDDEF)) {
+        def->push(parse_statement());
+    }
+    next();
+    return def;
 }
 
 /*

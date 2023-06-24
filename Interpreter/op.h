@@ -390,6 +390,13 @@ public:
     virtual Result eval();
 };
 
+class DefDeclList: public NaryOp
+{
+public:
+    DefDeclList(LexerToken _token);
+    virtual Result eval();
+};
+
 // A record definition operation
 class RecordDef: public NaryOp 
 {

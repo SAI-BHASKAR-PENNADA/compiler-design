@@ -56,6 +56,8 @@ protected:
     virtual ParseTree *parse_array_assign(LexerToken _token);
     virtual ParseTree *parse_class();
     virtual ParseTree *parse_var_decl_list();
+    virtual ParseTree *parse_def_decl_list();
+    virtual ParseTree *parse_def();
 
 private:
     Lexer &_lexer;

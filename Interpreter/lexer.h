@@ -44,7 +44,8 @@ enum Token
     CLASSEND,
     DEF,
     ENDDEF,
-    DERIVED
+    DERIVED,
+    ISA
 };
 
 // translate tokens into strings for easy debugging

@@ -53,6 +53,8 @@ std::ostream& operator<<(std::ostream& os, const Result &result)
         case REAL:
             os << result.val.r;
             break;
+        default:
+            break;
     }
 
     return os;
@@ -103,6 +105,17 @@ Result& RefEnv::operator[](const std::string &name)
     return _symtab[name];
 }
 
+RefEnv RefEnv::getEnv(const std::string &objName) {
+    if (_objtab.find(objName) != _objtab.end()) {
+        return _objtab[objName];
+    } else
+        return *(new RefEnv());
+}
+
+void RefEnv::setEnv(const std::string &objName) {
+    RefEnv *newenv = new RefEnv();
+    _objtab[objName] = *newenv;
+}
 
 
 //////////////////////////////////////////
@@ -621,6 +634,8 @@ Result ScanF::eval() {
         var.val.r = userIp;
     }
     env[token().lexeme] = var;
+    Result res;
+    return res;
 }
 
 //////////////////////////////////////////
@@ -640,6 +655,8 @@ Result IfStatement::eval() {
             right()->eval();
         }
     }
+    Result res;
+    return res;
 }
 
 //////////////////////////////////////////
@@ -687,6 +704,8 @@ Result Statementblock::eval() {
     for(auto itr = begin(); itr != end(); itr++) {
         (*itr)->eval();
     }
+    Result res;
+    return res;
 }
 
 //////////////////////////////////////////
@@ -714,6 +733,8 @@ Result ArrayInit::eval() {
     env.declare(name, ARRAY);
     env[name] = arr;
     env[name].type = ARRAY;
+    Result res;
+    return res;
 }
 
 //////////////////////////////////////////
@@ -737,6 +758,8 @@ Result VarDecl::eval()
             break;
         case REAL_DECL:
             var_type = REAL;
+            break;
+        default:
             break;
     }
 
@@ -833,7 +856,7 @@ Result ArrayAssign::eval() {
         else
             arrayPtr[ind] = rhs.val.r;
     }
-
+    return rhs;
 }
 
 
@@ -862,6 +885,33 @@ ClassDefinition::ClassDefinition(LexerToken _token) : BinaryOp(_token) {}
 Result ClassDefinition::eval() {
     //left has variable declaration
     //right has function definitions
+    Result classNode;
+    classNode.val.ptr = this;
+    env.declare(token().lexeme, CLASSDECLARATION);
+    env[token().lexeme] = classNode;
+    Result res;
+    return res;
+}
+
+//////////////////////////////////////////
+// class definition Implementation
+//////////////////////////////////////////
+ObjectCreation::ObjectCreation(LexerToken _token) : UnaryOp(_token) {}
+Result ObjectCreation::eval() {
+
+    // create reference env for the object
+    std::string objectName = token().lexeme;
+    env.setEnv(objectName);
+
+    // create new entry for object in global env.. this holds the class name
+    std::string className = child()->token().lexeme;
+    env.declare(objectName, OBJECT);
+    char *ptr = new char[objectName.length() + 1];
+    std::strcpy(ptr, objectName.c_str());
+    env[objectName].val.ptr = ptr;
+
+    Result res;
+    return res;
 }
 
 //////////////////////////////////////////
@@ -873,13 +923,15 @@ Result VarDeclList::eval() {
     for (auto it = begin(); it != end(); it++) {
         (*it)->eval();
     }
+    Result res;
+    return res;
 }
 
 //////////////////////////////////////////
-// var declaration list Implementation
+// function declaration list Implementation
 //////////////////////////////////////////
 DefDeclList::DefDeclList(LexerToken _token) : NaryOp(_token) {}
-Result DefDeclList::eval() {}
+Result DefDeclList::eval() { Result res; return res;}
 
 //////////////////////////////////////////
 // RecordDef Implementation

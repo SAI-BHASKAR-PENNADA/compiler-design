@@ -87,7 +87,9 @@ ParseTree *Parser::parse_statement()
         LexerToken variableName = curtok();
         next();
 
-        if (not has(LBRACKET)) {
+        if (has(ISA)) {
+            result = parse_obj_decl(variableName);
+        } else if (not has(LBRACKET)) {
             result = parse_statement_prime(new Var(variableName));
         } else {
             return parse_array_assign(variableName);
@@ -181,6 +183,15 @@ ParseTree *Parser::parse_def() {
     }
     next();
     return def;
+}
+
+ParseTree *Parser::parse_obj_decl(LexerToken _token) {
+    next();
+    ObjectCreation *obj = new ObjectCreation(_token);
+    must_be(IDENTIFIER);
+    obj->child(new Var(curtok()));
+    next();
+    return obj;
 }
 
 /*

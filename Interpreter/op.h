@@ -22,6 +22,7 @@ union ResultField
     int i;
     double r;
     struct arrstruct arr;
+    void *ptr;
 };
 
 
@@ -30,7 +31,9 @@ enum ResultType
     VOID=0,
     INTEGER,
     REAL,
-    ARRAY
+    ARRAY,
+    CLASSDECLARATION,
+    OBJECT
 };
 
 
@@ -71,8 +74,15 @@ public:
     // retrieve a variable associative array style
     virtual Result& operator[](const std::string &name);
 
+    // retrieve env of an object
+    virtual RefEnv getEnv(const std::string &objName);
+
+    // set new env for an object
+    virtual void setEnv(const std::string &objName);
+
 private:
     std::map<std::string, Result> _symtab;
+    std::map<std::string, RefEnv> _objtab;
 };
 
 
@@ -394,6 +404,14 @@ class DefDeclList: public NaryOp
 {
 public:
     DefDeclList(LexerToken _token);
+    virtual Result eval();
+};
+
+// An object creation operation
+class ObjectCreation: public UnaryOp
+{
+public:
+    ObjectCreation(LexerToken _token);
     virtual Result eval();
 };
 

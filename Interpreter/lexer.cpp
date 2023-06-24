@@ -42,7 +42,8 @@ const char* TSTR[] = {
     "CLASSEND",
     "DEF",
     "EDNDEF",
-    "DERIVED"
+    "DERIVED",
+    "ISA"
 };
 
 
@@ -387,6 +388,8 @@ bool Lexer::lex_kw_id()
         _curtok.token = ENDDEF;
     } else if(_curtok.lexeme == "derived") {
         _curtok.token = DERIVED;
+    } else if(_curtok.lexeme == "isa") {
+        _curtok.token = ISA;
     }
 
     return true;

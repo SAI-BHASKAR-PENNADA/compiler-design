@@ -811,6 +811,32 @@ Result ArrayAccess::eval()
     return res;
 }
 
+//////////////////////////////////////////
+// ArrayAssign Implementation
+//////////////////////////////////////////
+ArrayAssign::ArrayAssign(LexerToken _token) : BinaryOp( _token) {}
+
+Result ArrayAssign::eval() {
+    // token has var name
+    // left has index expression
+    // right has another expression
+    Result rhs = right()->eval();
+    Result index = left()->eval();
+    int ind = index.val.i;
+    std::string varName = token().lexeme;
+    bool isint = env[varName].val.arr.isInt;
+    if ((isint and rhs.type != INTEGER) or (not isint and rhs.type == INTEGER)) {
+        std::cout<<"result type of expression does not match the array element type\n";
+    } else {
+        int *arrayPtr = static_cast<int*>(env[varName].val.arr.ptr);
+        if (rhs.type == INTEGER)
+            arrayPtr[ind] = rhs.val.i;
+        else
+            arrayPtr[ind] = rhs.val.r;
+    }
+
+}
+
 
 //////////////////////////////////////////
 // ArrayIndex Implementation 

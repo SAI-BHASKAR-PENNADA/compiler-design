@@ -358,6 +358,13 @@ public:
     virtual Result eval();
 };
 
+// An array assign operation
+class ArrayAssign: public BinaryOp
+{
+public:
+    ArrayAssign(LexerToken _token);
+    virtual Result eval();
+};
 
 // An array index node
 class ArrayIndex: public NaryOp

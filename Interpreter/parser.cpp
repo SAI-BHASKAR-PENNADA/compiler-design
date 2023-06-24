@@ -84,9 +84,24 @@ ParseTree *Parser::parse_statement()
     ParseTree *result;
     if(has(IDENTIFIER)) {
         // statement which begin with an identifier
-        ParseTree *var = new Var(curtok());
+        LexerToken variableName = curtok();
         next();
-        result = parse_statement_prime(var);
+
+        if (not has(LBRACKET)) {
+            result = parse_statement_prime(new Var(variableName));
+        } else {
+            next();
+            ArrayAssign *arrasgn = new ArrayAssign(variableName);
+            arrasgn->left(parse_expression());
+            must_be(RBRACKET);
+            next();
+            must_be(EQUAL);
+            next();
+            arrasgn->right(parse_expression());
+            must_be(NEWLINE);
+            next();
+            return arrasgn;
+        }
     } else if(has(INTEGER_DECL) or has(REAL_DECL)) {
         result = parse_var_decl();
     } else if(has(IF) || has(WHILE)) {
@@ -102,7 +117,6 @@ ParseTree *Parser::parse_statement()
     // handle the newline at the end of the statement
     must_be(NEWLINE);
     next();
-
     return result;
 }
 

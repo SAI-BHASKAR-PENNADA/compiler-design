@@ -1,0 +1,36 @@
+print "enter 10 integers one after other"
+integer arrSize
+arrSize = 10
+
+integer [arrSize] nums
+
+integer p
+p = 0
+integer r
+while(p < 10):
+    scanf(r)
+    nums[p] = r
+    p = p + 1
+endwhile
+
+integer i
+i = 0
+integer j
+integer k
+j = 0
+k = 10-1
+integer temp
+while(j < k):
+    temp = nums[j]
+    nums[j] = nums[k]
+    nums[k] = temp
+    j = j + 1
+    k = k - 1
+endwhile
+
+print "numbers in reverse order"
+p = 0
+while(p < 10):
+    print nums[p]
+    p = p + 1
+endwhile

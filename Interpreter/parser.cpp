@@ -395,7 +395,6 @@ ParseTree *Parser::parse_number()
     ParseTree *result;
 
     if(has(IDENTIFIER)) {
-        std::cout << curtok() << "\n";
         LexerToken variableName = curtok();
         next();
         if (not has(LBRACKET)) {

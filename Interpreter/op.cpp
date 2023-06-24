@@ -609,7 +609,6 @@ ScanF::ScanF(LexerToken _token) : ParseTree(_token) {}
 Result ScanF::eval() {
     int userInput;
     double userIp;
-    std::cout << "Value for " << token().lexeme << ": ";
 
 
     // check type of the variable

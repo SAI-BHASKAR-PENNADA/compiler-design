@@ -1,0 +1,17 @@
+class person:
+    integer a
+
+    def whoareyou():
+        print "i am a person"
+    enddef
+
+    def anotherdef():
+        print "another def"
+    enddef
+classend
+
+howard isa person
+
+integer [10] nums
+nums[2] = 13
+print nums[2]

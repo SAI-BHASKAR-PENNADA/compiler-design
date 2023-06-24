@@ -89,6 +89,8 @@ ParseTree *Parser::parse_statement()
 
         if (has(ISA)) {
             result = parse_obj_decl(variableName);
+        } if (has(DOT)) {
+            result = parse_obj_access(variableName);
         } else if (not has(LBRACKET)) {
             result = parse_statement_prime(new Var(variableName));
         } else {
@@ -112,6 +114,25 @@ ParseTree *Parser::parse_statement()
     must_be(NEWLINE);
     next();
     return result;
+}
+
+ParseTree *Parser::parse_obj_access(LexerToken _token) {
+    next();
+    must_be(IDENTIFIER);
+    ObjectAccess *objectAccess = new ObjectAccess(_token);
+    objectAccess->push(new Var(curtok()));
+    next();
+
+    // can be a variable or a function
+    if (has(LPAREN)) {
+        // push this - to know if accessed element is variable or a function
+        objectAccess->push(new Var(curtok()));
+        next();
+
+        must_be(RPAREN);
+        next();
+    }
+    return objectAccess;
 }
 
 ParseTree *Parser::parse_class() {

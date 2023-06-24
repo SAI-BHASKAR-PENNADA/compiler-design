@@ -415,6 +415,14 @@ public:
     virtual Result eval();
 };
 
+// An object access operation
+class ObjectAccess: public NaryOp
+{
+public:
+    ObjectAccess(LexerToken _token);
+    virtual Result eval();
+};
+
 // A record definition operation
 class RecordDef: public NaryOp 
 {

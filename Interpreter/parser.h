@@ -59,6 +59,7 @@ protected:
     virtual ParseTree *parse_def_decl_list();
     virtual ParseTree *parse_def();
     virtual ParseTree *parse_obj_decl(LexerToken _token);
+    virtual ParseTree *parse_obj_access(LexerToken _token);
 
 private:
     Lexer &_lexer;

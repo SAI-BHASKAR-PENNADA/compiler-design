@@ -1,0 +1,54 @@
+class bubblesort:
+
+    def sort(integer [10] nums):
+        integer i
+        integer temp
+        integer j
+        integer k
+        i = 1
+        while (i<10):
+            j = 0
+            k = j + 1
+
+            while (k<10):
+                if (nums[j] > nums[k]):
+                   temp = nums[j]
+                   nums[j] = nums[k]
+                   nums[k] = temp
+                endif
+                j = j + 1
+                k = j + 1
+            endwhile
+            i = i + 1
+        endwhile
+    enddef
+
+classend
+
+
+
+print "enter 10 integers one after other"
+integer arrSize
+arrSize = 10
+
+integer [arrSize] nums
+
+integer p
+p = 0
+integer r
+while(p < 10):
+    scanf(r)
+    nums[p] = r
+    p = p + 1
+endwhile
+
+sorter isa bubblesort
+
+sorter.sort(nums)
+
+print "numbers in sorted order"
+p = 0
+while(p < 10):
+    print nums[p]
+    p = p + 1
+endwhile

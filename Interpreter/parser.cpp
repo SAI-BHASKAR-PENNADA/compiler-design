@@ -129,6 +129,16 @@ ParseTree *Parser::parse_obj_access(LexerToken _token) {
         objectAccess->push(new Var(curtok()));
         next();
 
+        // add all arguments now
+        while (not has(RPAREN)) {
+            objectAccess->push(new Var(curtok()));
+            next();
+            if (has(COMMA))
+                next();
+            else
+                must_be(RPAREN);
+        }
+
         must_be(RPAREN);
         next();
     }
@@ -189,8 +199,8 @@ ParseTree *Parser::parse_def() {
 
     must_be(LPAREN);
     next();
-    // TODO - parse parameter list
-    must_be(RPAREN);
+    while (not has(RPAREN))
+        next();
     next();
 
     must_be(ISTO);

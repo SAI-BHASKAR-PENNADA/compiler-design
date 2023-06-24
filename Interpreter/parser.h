@@ -53,6 +53,9 @@ protected:
     virtual ParseTree *parse_scanf();
     virtual ParseTree *parse_alpha_numeric();
     virtual ParseTree *parse_array_init(LexerToken _token);
+    virtual ParseTree *parse_array_assign(LexerToken _token);
+    virtual ParseTree *parse_class();
+    virtual ParseTree *parse_var_decl_list();
 
 private:
     Lexer &_lexer;

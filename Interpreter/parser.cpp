@@ -90,17 +90,7 @@ ParseTree *Parser::parse_statement()
         if (not has(LBRACKET)) {
             result = parse_statement_prime(new Var(variableName));
         } else {
-            next();
-            ArrayAssign *arrasgn = new ArrayAssign(variableName);
-            arrasgn->left(parse_expression());
-            must_be(RBRACKET);
-            next();
-            must_be(EQUAL);
-            next();
-            arrasgn->right(parse_expression());
-            must_be(NEWLINE);
-            next();
-            return arrasgn;
+            return parse_array_assign(variableName);
         }
     } else if(has(INTEGER_DECL) or has(REAL_DECL)) {
         result = parse_var_decl();
@@ -110,6 +100,8 @@ ParseTree *Parser::parse_statement()
         result = parse_print();
     } else if(has(SCANF)) {
         result = parse_scanf();
+    } else if (has(CLASS)) {
+        result = parse_class();
     } else {
         result = parse_expression();
     }
@@ -120,6 +112,36 @@ ParseTree *Parser::parse_statement()
     return result;
 }
 
+ParseTree *Parser::parse_class() {
+    next();
+    must_be(IDENTIFIER);
+    ClassDefinition *def = new ClassDefinition(curtok());
+    next();
+
+    must_be(ISTO);
+    next();
+
+    must_be(NEWLINE);
+    next();
+
+    // store all variable declarations in left child
+    def->left(parse_var_decl_list());
+
+    // store all function declarations in right child
+
+    must_be(CLASSEND);
+    next();
+    return def;
+}
+
+ParseTree *Parser::parse_var_decl_list() {
+    VarDeclList *decList = new VarDeclList(curtok());
+
+    // TODO - get the access modifier for the variable.
+    decList->push(parse_var_decl());
+    must_be(NEWLINE);
+    next();
+}
 
 /*
  * < Statement' >  ::= EQUAL < Expression > 
@@ -170,6 +192,20 @@ ParseTree *Parser::parse_array_init(LexerToken _token) {
     arrinit->push(new Var(curtok()));
     next();
     return arrinit;
+}
+
+ParseTree *Parser::parse_array_assign(LexerToken varname) {
+    next();
+    ArrayAssign *arrasgn = new ArrayAssign(varname);
+    arrasgn->left(parse_expression());
+    must_be(RBRACKET);
+    next();
+    must_be(EQUAL);
+    next();
+    arrasgn->right(parse_expression());
+    must_be(NEWLINE);
+    next();
+    return arrasgn;
 }
 
 /*

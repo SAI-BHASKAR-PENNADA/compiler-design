@@ -37,7 +37,12 @@ const char* TSTR[] = {
     "IS",
     "ISTO",
     "WHILE",
-    "WHILEEND"
+    "WHILEEND",
+    "CLASS",
+    "CLASSEND",
+    "DEF",
+    "EDNDEF",
+    "DERIVED"
 };
 
 
@@ -372,6 +377,16 @@ bool Lexer::lex_kw_id()
         _curtok.token = END;
     } else if(_curtok.lexeme == "is") {
         _curtok.token = CONDITIONALOP;
+    } else if(_curtok.lexeme == "class") {
+        _curtok.token = CLASS;
+    } else if(_curtok.lexeme == "classend") {
+        _curtok.token = CLASSEND;
+    } else if(_curtok.lexeme == "def") {
+        _curtok.token = DEF;
+    } else if(_curtok.lexeme == "enddef") {
+        _curtok.token = ENDDEF;
+    } else if(_curtok.lexeme == "derived") {
+        _curtok.token = DERIVED;
     }
 
     return true;

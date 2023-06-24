@@ -374,6 +374,21 @@ public:
     virtual Result eval();
 };
 
+// A class defintion operation
+class ClassDefinition: public BinaryOp
+{
+public:
+    ClassDefinition(LexerToken _token);
+    virtual Result eval();
+};
+
+// variable declarations in a class
+class VarDeclList: public NaryOp
+{
+public:
+    VarDeclList(LexerToken _token);
+    virtual Result eval();
+};
 
 // A record definition operation
 class RecordDef: public NaryOp 

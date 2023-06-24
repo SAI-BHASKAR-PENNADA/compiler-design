@@ -855,6 +855,25 @@ Result ArrayIndex::eval()
     return result;
 }
 
+//////////////////////////////////////////
+// class definition Implementation
+//////////////////////////////////////////
+ClassDefinition::ClassDefinition(LexerToken _token) : BinaryOp(_token) {}
+Result ClassDefinition::eval() {
+    //left has variable declaration
+    //right has function definitions
+}
+
+//////////////////////////////////////////
+// var declaration list Implementation
+//////////////////////////////////////////
+VarDeclList::VarDeclList(LexerToken _token) : NaryOp(_token) {}
+Result VarDeclList::eval() {
+    // evaluates all declarations and adds to the object's environment
+    for (auto it = begin(); it != end(); it++) {
+        (*it)->eval();
+    }
+}
 
 //////////////////////////////////////////
 // RecordDef Implementation

@@ -39,7 +39,12 @@ enum Token
     IS,
     ISTO,
     WHILE,
-    ENDWHILE
+    ENDWHILE,
+    CLASS,
+    CLASSEND,
+    DEF,
+    ENDDEF,
+    DERIVED
 };
 
 // translate tokens into strings for easy debugging

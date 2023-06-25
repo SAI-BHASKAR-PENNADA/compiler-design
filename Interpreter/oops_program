@@ -6,7 +6,7 @@ class person:
     enddef
 
     def personmethod():
-        print "another method"
+        print "parent method invoked"
     enddef
 classend
 

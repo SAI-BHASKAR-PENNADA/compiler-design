@@ -151,6 +151,16 @@ ParseTree *Parser::parse_class() {
     ClassDefinition *def = new ClassDefinition(curtok());
     next();
 
+    // for derived classes
+    if (has(DERIVED)) {
+        def->isDerived = true;
+        next();
+        def->parentName = curtok().lexeme;
+        next();
+    } else {
+        def->isDerived = false;
+    }
+
     must_be(ISTO);
     next();
 
@@ -193,7 +203,8 @@ ParseTree *Parser::parse_def_decl_list() {
 
 ParseTree *Parser::parse_def() {
     next();
-    // can re-use program node to store all statements in the function
+
+    //can re-use program node to store all statements in the function
     Program *def = new Program(curtok());
     next();
 

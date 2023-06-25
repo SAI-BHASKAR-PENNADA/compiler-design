@@ -312,7 +312,7 @@ Result Program::eval()
 {
     // evaluate each statement in the program
     for(auto itr = begin(); itr != end(); itr++) {
-        (*itr)->eval();
+            (*itr)->eval();
     }
 
     // programs return void
@@ -935,8 +935,28 @@ Result ObjectAccess::eval() {
         // right child has the function list
         DefDeclList *deflist = (DefDeclList*) def->right();
         for (auto it = deflist->begin(); it != deflist->end(); it++) {
-            (*it)->eval();
+            if ((*it)->token().lexeme == methodName) {
+                (*it)->eval();
+                Result res;
+                return res;
+            }
         }
+
+        //if function is not found look in the parent
+        if (def->isDerived) {
+            std::string parentClassName = def->parentName;
+            def = (ClassDefinition*) env[parentClassName].val.ptr;
+            deflist = (DefDeclList*) def->right();
+            for (auto it = deflist->begin(); it != deflist->end(); it++) {
+                if ((*it)->token().lexeme == methodName) {
+                    (*it)->eval();
+                    Result res;
+                    return res;
+                }
+            }
+        }
+
+        throw std::runtime_error("Method: " + methodName + " not found in: " + objName);
     }
     Result res;
     return res;

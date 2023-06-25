@@ -390,6 +390,8 @@ class ClassDefinition: public BinaryOp
 public:
     ClassDefinition(LexerToken _token);
     virtual Result eval();
+    bool isDerived;
+    std::string parentName;
 };
 
 // variable declarations in a class

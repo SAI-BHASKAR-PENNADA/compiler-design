@@ -1,4 +1,4 @@
-CXXFLAGS=-g --std=c++17
+CXXFLAGS=-g --std=c++20
 TARGETS= lexer_test parser_test calc
 
 all: $(TARGETS)

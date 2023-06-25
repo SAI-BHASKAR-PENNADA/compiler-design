@@ -390,6 +390,10 @@ bool Lexer::lex_kw_id()
         _curtok.token = DERIVED;
     } else if(_curtok.lexeme == "isa") {
         _curtok.token = ISA;
+    } else if(_curtok.lexeme == "private") {
+        _curtok.token = PRIVATE;
+    } else if(_curtok.lexeme == "public") {
+        _curtok.token = PUBLIC;
     }
 
     return true;

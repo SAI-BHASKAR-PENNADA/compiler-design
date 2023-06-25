@@ -181,8 +181,10 @@ ParseTree *Parser::parse_class() {
 ParseTree *Parser::parse_var_decl_list() {
     VarDeclList *decList = new VarDeclList(curtok());
 
-    // TODO - get the access modifier for the variable.
-    while (has(INTEGER_DECL) or has(REAL_DECL)) {
+    // check for access modifier
+    while (has(PUBLIC) or has(PRIVATE)) {
+        decList->push(new Var(curtok()));
+        next();
         decList->push(parse_var_decl());
         must_be(NEWLINE);
         next();

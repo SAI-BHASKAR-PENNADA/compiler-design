@@ -908,7 +908,12 @@ Result ObjectCreation::eval() {
     // create new entry for object in global env.. this holds the class name
     std::string className = child()->token().lexeme;
     char *ptr = new char[className.length() + 1];
-    std::strcpy(ptr, className.c_str());
+    //std::strcpy(ptr, className.c_str());
+    int i = 0;
+    while (i < className.length() + 1) {
+        ptr[i] = className[i];
+        i++;
+    }
     env[objectName].val.ptr = ptr;
 
     Result res;
@@ -921,7 +926,16 @@ Result ObjectCreation::eval() {
 ObjectAccess::ObjectAccess(LexerToken _token) : NaryOp(_token) {}
 Result ObjectAccess::eval() {
     // check if a function or variable
-    if ((*(begin()+1))->token() == LPAREN) {
+    if ((*(begin()+1)) == nullptr) {
+        //it is a variable access
+        std::string varName = (*begin())->token().lexeme;
+        std::string objName = token().lexeme;
+        // get class name from the env
+        char *class_name = static_cast<char*>(env[objName].val.ptr);
+        // now we have class name, look for the class node
+        std::string className(class_name);
+        ClassDefinition *def = (ClassDefinition*) env[className].val.ptr; // contains the class node
+    } else if ((*(begin()+1))->token() == LPAREN) {
         //it is a function.. evaluate the function
         std::string objName = token().lexeme;
         std::string methodName = (*begin())->token().lexeme;

@@ -1,5 +1,5 @@
 class person:
-    integer a
+    private integer a
 
     def whoareyou():
         print "i am a person"
@@ -23,5 +23,7 @@ ravi.personmethod()
 
 sai isa employee
 
+# whoareyou is overriden in employee class -- prints i am an employee --- POLYMORPHISM
 sai.whoareyou()
+# this method is present in person class only -- stil works because employee inherits person --- INHERITENCE
 sai.personmethod()

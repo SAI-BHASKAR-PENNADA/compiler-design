@@ -45,7 +45,9 @@ enum Token
     DEF,
     ENDDEF,
     DERIVED,
-    ISA
+    ISA,
+    PRIVATE,
+    PUBLIC,
 };
 
 // translate tokens into strings for easy debugging

@@ -2,7 +2,7 @@
 
 Look at the Interpreter/bnf.txt and Interpreter/examples for syntax and other information related to the new language.
 
-# steps to run example programs
+steps to run example programs:
 
 1. cd Interpreter
 2. make

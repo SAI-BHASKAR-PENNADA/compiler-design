@@ -5,7 +5,8 @@ interpreter file name --> calc
 
 steps to run example programs
 
-1. make
-2. ./calc reverse_numbers
-3. ./calc bubble_sort
-4. ./calc oops_program
+1. cd Interpreter
+2. make
+3. ./calc examples/reverse_numbers
+4. ./calc bubble_sort
+5. ./calc oops_program
